@@ -1,0 +1,99 @@
+# Конфигурация системы совмещения изображений
+# Этот файл опционален - все параметры можно передать через CLI
+
+# Пути
+paths:
+  input_dir: "./images"
+  output_dir: "./results"
+  log_file: null  # или "./processing.log"
+
+# Параметры детектора особенностей
+feature_detection:
+  detector: "orb"  # orb, sift, akaze
+  max_features: 5000
+
+  # Параметры для ORB
+  orb:
+    scaleFactor: 1.2
+    nlevels: 8
+    edgeThreshold: 31
+
+  # Параметры для SIFT (если доступен)
+  sift:
+    nOctaveLayers: 3
+    contrastThreshold: 0.04
+    edgeThreshold: 10
+    sigma: 1.6
+
+  # Параметры для AKAZE
+  akaze:
+    threshold: 0.001
+
+# Параметры сопоставления
+matching:
+  ratio_threshold: 0.75  # Lowe's ratio test
+  cross_check: false
+
+# Параметры RANSAC
+ransac:
+  threshold: 3.0        # пиксели
+  confidence: 0.995     # 99.5%
+  max_iterations: 5000
+
+# Предобработка изображений
+preprocessing:
+  enable_clahe: true
+  clahe_clip_limit: 2.0
+  clahe_tile_size: [8, 8]
+
+  # Опциональные фильтры
+  enable_gaussian_blur: false
+  gaussian_kernel_size: [5, 5]
+
+  # Бинаризация (если нужна)
+  enable_threshold: false
+  threshold_value: 127
+
+# Визуализации
+visualization:
+  create_visualizations: true
+  max_display_matches: 100
+  checkerboard_square_size: 100
+  heatmap_colormap: "JET"  # JET, HOT, COOL, etc.
+  overlay_alpha: 0.5
+
+# Выходные данные
+output:
+  save_json: true
+  save_visualizations: true
+  save_aligned_images: false  # Сохранять ли совмещенные изображения
+  json_indent: 2
+  create_summary: true
+
+# Логирование
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  console_output: true
+  file_output: false
+
+# Фильтрация результатов
+quality_filters:
+  min_matches: 10           # Минимальное количество совпадений
+  min_inliers: 8           # Минимальное количество inliers
+  min_inlier_ratio: 0.3    # Минимальная доля inliers
+  max_rmse: 10.0           # Максимальная допустимая RMSE
+
+# Производительность
+performance:
+  use_multiprocessing: false  # Пока не реализовано
+  num_workers: 4
+  batch_size: 1
+
+# Отладка
+debug:
+  save_intermediate_results: false
+  visualize_keypoints: false
+  print_homography_matrix: false
+  save_feature_matches: false
