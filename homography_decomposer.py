@@ -93,8 +93,8 @@ class HomographyDecomposer:
             result['shear'] = float(np.degrees(shear_rad))
 
             logger.info(f"Декомпозиция: rotation={result['rotation_deg']:.2f}°, "
-                        f"scale=({result['scale_x']:.3f}, {result['scale_y']:.3f}), "
-                        f"shift=({result['shift_x_px']:.1f}, {result['shift_y_px']:.1f})")
+                       f"scale=({result['scale_x']:.3f}, {result['scale_y']:.3f}), "
+                       f"shift=({result['shift_x_px']:.1f}, {result['shift_y_px']:.1f})")
 
         except Exception as e:
             logger.error(f"Ошибка при декомпозиции: {e}")
@@ -116,7 +116,7 @@ class HomographyDecomposer:
 
         H_norm = H / H[2, 2]
 
-        # Дополнительные метрики
+        # Дополнительные метрики (все значения приводим к JSON-совместимым типам)
         detailed = {
             **basic,
             'is_pure_translation': False,
@@ -128,22 +128,22 @@ class HomographyDecomposer:
         }
 
         # Проверка на чисто аффинное преобразование
-        perspective_magnitude = np.sqrt(H_norm[2, 0] ** 2 + H_norm[2, 1] ** 2)
-        detailed['is_affine'] = perspective_magnitude < 1e-6
+        perspective_magnitude = np.sqrt(H_norm[2, 0]**2 + H_norm[2, 1]**2)
+        detailed['is_affine'] = bool(perspective_magnitude < 1e-6)
 
         # Проверка на чистый сдвиг
         A = H_norm[:2, :2]
         is_identity = np.allclose(A, np.eye(2), atol=1e-3)
-        detailed['is_pure_translation'] = is_identity
+        detailed['is_pure_translation'] = bool(is_identity)
 
         # Проверка на чистый поворот (без масштаба)
         scale_diff = abs(detailed['scale_x'] - 1.0) + abs(detailed['scale_y'] - 1.0)
-        detailed['is_pure_rotation'] = scale_diff < 0.01 and not detailed['is_pure_translation']
+        detailed['is_pure_rotation'] = bool(scale_diff < 0.01 and not detailed['is_pure_translation'])
 
         # Анизотропия (различие масштабов по осям)
         if detailed['scale_y'] != 0:
-            detailed['anisotropy'] = detailed['scale_x'] / detailed['scale_y']
-            detailed['aspect_ratio_change'] = detailed['anisotropy']
+            detailed['anisotropy'] = float(detailed['scale_x'] / detailed['scale_y'])
+            detailed['aspect_ratio_change'] = float(detailed['anisotropy'])
 
         # Число обусловленности (насколько хорошо определена матрица)
         try:
@@ -157,12 +157,12 @@ class HomographyDecomposer:
 
     @staticmethod
     def reconstruct_from_components(rotation_deg: float,
-                                    scale_x: float,
-                                    scale_y: float,
-                                    shift_x: float,
-                                    shift_y: float,
-                                    perspective_x: float = 0.0,
-                                    perspective_y: float = 0.0) -> np.ndarray:
+                                   scale_x: float,
+                                   scale_y: float,
+                                   shift_x: float,
+                                   shift_y: float,
+                                   perspective_x: float = 0.0,
+                                   perspective_y: float = 0.0) -> np.ndarray:
         """
         Восстанавливает матрицу гомографии из компонент
         (полезно для тестирования)
@@ -182,8 +182,8 @@ class HomographyDecomposer:
         # Rotation matrix
         R = np.array([
             [c, -s, 0],
-            [s, c, 0],
-            [0, 0, 1]
+            [s,  c, 0],
+            [0,  0, 1]
         ])
 
         # Scale matrix
